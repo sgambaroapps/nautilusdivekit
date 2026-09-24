@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nautilus DiveKit — the whole diver's kit in one app</title>
+<meta name="description" content="Dive logbook, certifications, calculators, marine life, hand signals and knots for recreational divers. Free, no ads, no account, works offline. Android and iPhone.">
+<link rel="icon" href="assets/icona.png">
+<link rel="apple-touch-icon" href="assets/icona.png">
+<meta name="theme-color" content="#0b3c5d">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Nautilus DiveKit">
+<meta property="og:description" content="Dive logbook, certifications, calculators, marine life, hand signals and knots for recreational divers. Free, no ads, no account, works offline. Android and iPhone.">
+<meta property="og:image" content="assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+:root{
+  --fondo:#ffffff; --testo:#14212b; --tenue:#5a6a76;
+  --blu:#0b3c5d; --azzurro:#1b7aa6; --chiaro:#eef6fb; --bordo:#dbe6ee;
+  --scheda:#ffffff; --ombra:0 1px 2px rgba(11,60,93,.06), 0 8px 24px rgba(11,60,93,.07);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --fondo:#0f171e; --testo:#e7eef3; --tenue:#9db0be;
+    --blu:#8fc7e0; --azzurro:#5fb0d4; --chiaro:#16242e; --bordo:#263a48;
+    --scheda:#141f28; --ombra:0 1px 2px rgba(0,0,0,.3), 0 10px 26px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+/* L'attributo hidden deve vincere sulle regole che danno un display agli
+   elementi (per esempio .brand span): senza questo le sei diciture di lingua
+   resterebbero tutte visibili una sotto l'altra. */
+[hidden]{display:none !important}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--fondo); color:var(--testo);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-text-size-adjust:100%;
+}
+img{max-width:100%; display:block}
+a{color:var(--azzurro)}
+
+/* ---- barra in alto ---- */
+.top{
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+  max-width:1060px; margin:0 auto; padding:14px 20px;
+}
+.brand{display:flex; align-items:center; gap:11px; min-width:0}
+.brand img{width:40px; height:40px; border-radius:10px; flex:none}
+.brand b{display:block; font-size:1.02rem; letter-spacing:.2px; line-height:1.2}
+.brand span{display:block; font-size:.8rem; color:var(--tenue)}
+nav#lingue{display:flex; flex-wrap:wrap; gap:6px}
+nav#lingue a{
+  font-size:.82rem; text-decoration:none; padding:5px 12px; border-radius:999px;
+  border:1px solid var(--bordo); color:var(--tenue);
+}
+nav#lingue a:hover{border-color:var(--azzurro); color:var(--azzurro)}
+nav#lingue a.attiva{background:var(--azzurro); border-color:var(--azzurro); color:#fff; font-weight:600}
+
+/* ---- apertura ---- */
+.hero{
+  position:relative; overflow:hidden; color:#fff; border-radius:22px;
+  background:linear-gradient(135deg,#0a2a47 0%,#12507d 52%,#2b86ad 100%);
+  padding:52px 30px 46px; text-align:center;
+}
+.hero::after{
+  content:""; position:absolute; inset:-40% -10% auto; height:130%;
+  background:radial-gradient(60% 55% at 50% 0%, rgba(255,255,255,.22), transparent 70%);
+  pointer-events:none;
+}
+.hero>*{position:relative; z-index:1}
+.hero h1{margin:0 auto 14px; font-size:2.25rem; line-height:1.18; max-width:16em; letter-spacing:-.4px}
+.hero p.sub{margin:0 auto; max-width:40em; font-size:1.08rem; color:#dcecf6}
+.chips{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:22px auto 0; max-width:44em}
+.chips span{
+  font-size:.83rem; padding:6px 13px; border-radius:999px;
+  background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.26); color:#fff;
+}
+
+/* ---- pulsanti store ---- */
+.store{display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin:26px 0 0}
+.store a, .store span.presto{
+  display:inline-flex; align-items:center; justify-content:center;
+  height:56px; padding:0; text-decoration:none;
+}
+.store a img{height:56px; width:auto}
+.store .ripiego{
+  display:none; align-items:center; gap:9px; height:54px; padding:0 20px; border-radius:11px;
+  background:#fff; color:#0a2a47; font-weight:600; font-size:.95rem; border:1px solid rgba(255,255,255,.5);
+}
+.store a.senzabadge img{display:none}
+.store a.senzabadge .ripiego{display:inline-flex}
+.store span.presto{
+  padding:0 20px; height:54px; border-radius:11px; font-size:.92rem;
+  background:rgba(255,255,255,.12); border:1px dashed rgba(255,255,255,.5); color:#eaf4fa;
+}
+.nota{margin:14px 0 0; font-size:.9rem; font-weight:700; color:#e9f5fc}
+
+/* ---- corpo ---- */
+.wrap{max-width:1060px; margin:0 auto; padding:0 20px 10px}
+section.pagina{padding-bottom:40px}
+h2{font-size:1.55rem; margin:54px 0 6px; letter-spacing:-.3px; color:var(--testo)}
+h2+p.occhiello{margin:0 0 22px; color:var(--tenue); max-width:46em}
+
+.griglia{display:grid; gap:14px;
+  /* min(...) e' indispensabile: senza, su uno schermo stretto la colonna
+     resterebbe larga 228px e la pagina sborderebbe di lato. */
+  grid-template-columns:repeat(auto-fit,minmax(min(228px,100%),1fr));
+}
+.card{
+  background:var(--scheda); border:1px solid var(--bordo); border-radius:16px;
+  padding:18px 18px 19px; box-shadow:var(--ombra);
+  transition:transform .16s ease, box-shadow .16s ease;
+}
+.card:hover{transform:translateY(-2px); box-shadow:0 2px 4px rgba(11,60,93,.08), 0 14px 30px rgba(11,60,93,.12)}
+.card .ico{
+  width:42px; height:42px; border-radius:12px; background:var(--chiaro);
+  display:flex; align-items:center; justify-content:center; margin-bottom:12px; color:var(--azzurro);
+}
+.card h3{margin:0 0 5px; font-size:1.02rem}
+.card p{margin:0; font-size:.9rem; color:var(--tenue); line-height:1.55}
+
+/* ---- perche' e' diversa ---- */
+.perche{
+  margin-top:54px; background:var(--chiaro); border:1px solid var(--bordo);
+  border-radius:20px; padding:30px 26px;
+}
+.perche h2{margin:0 0 16px}
+.perche ul{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr)); gap:11px 26px}
+.perche li{position:relative; padding-left:29px; font-size:.95rem}
+.perche li::before{
+  content:""; position:absolute; left:0; top:.34em; width:18px; height:18px; border-radius:50%;
+  background:var(--azzurro);
+  -webkit-mask:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M9.6 16.2 5.4 12l-1.4 1.4 5.6 5.6 12-12-1.4-1.4z'/%3E%3C/svg%3E") center/115% no-repeat;
+  mask:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M9.6 16.2 5.4 12l-1.4 1.4 5.6 5.6 12-12-1.4-1.4z'/%3E%3C/svg%3E") center/115% no-repeat;
+}
+
+/* ---- striscia delle schermate ---- */
+.striscia{display:flex; gap:16px; overflow-x:auto; padding:6px 2px 18px; scroll-snap-type:x mandatory}
+.striscia img{
+  width:224px; flex:none; border-radius:16px; border:1px solid var(--bordo);
+  box-shadow:var(--ombra); scroll-snap-align:center;
+  /* height:auto e' obbligatorio: nel tag c'e' anche l'attributo height (serve a
+     tenere lo spazio mentre l'immagine arriva), e senza questa riga il browser
+     lo prenderebbe alla lettera insieme alla larghezza del CSS, schiacciando le
+     schermate in verticale. */
+  height:auto;
+}
+
+/* ---- chiusura ---- */
+.chiusura{
+  margin-top:54px; border-radius:22px; text-align:center; color:#fff; padding:40px 26px 42px;
+  background:linear-gradient(135deg,#0a2a47 0%,#12507d 52%,#2b86ad 100%);
+}
+.chiusura h2{color:#fff; margin:0 0 6px}
+footer{margin:34px 0 46px; padding-top:20px; border-top:1px solid var(--bordo); color:var(--tenue); font-size:.87rem}
+footer .link{display:flex; flex-wrap:wrap; gap:8px 18px; margin-bottom:14px}
+footer p{margin:0 0 9px; max-width:60em}
+footer .disc{font-size:.8rem; opacity:.9}
+
+@media (max-width:720px){
+  .hero{border-radius:18px; padding:40px 20px 38px}
+  .hero h1{font-size:1.72rem}
+  .hero p.sub{font-size:1rem}
+  h2{font-size:1.32rem; margin-top:44px}
+  .striscia img{width:190px}
+}
+/* Senza JavaScript restano visibili tutte e sei le lingue, una sotto l'altra. */
+body.js section.pagina[hidden]{display:none}
+section.pagina + section.pagina{border-top:1px dashed var(--bordo); margin-top:30px}
+body.js section.pagina + section.pagina{border-top:none; margin-top:0}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><img src="assets/icona.png" alt="" width="40" height="40"><div><b>Nautilus DiveKit</b><span data-claim="it">Il kit del subacqueo ricreativo</span><span data-claim="en" hidden>The recreational diver's toolkit</span><span data-claim="es" hidden>El kit del buceador recreativo</span><span data-claim="fr" hidden>Le kit du plongeur loisir</span><span data-claim="de" hidden>Das Kit für Sporttaucher</span><span data-claim="pt" hidden>O kit do mergulhador recreativo</span></div></div>
+<nav id="lingue"><a href="#it" data-lang="it">Italiano</a><a href="#en" data-lang="en">English</a><a href="#es" data-lang="es">Español</a><a href="#fr" data-lang="fr">Français</a><a href="#de" data-lang="de">Deutsch</a><a href="#pt" data-lang="pt">Português</a></nav></header>
+<main>
+<section class="pagina" id="it" lang="it" data-titolo="Nautilus DiveKit — il kit del subacqueo in un'app sola">
+<div class="wrap">
+<div class="hero">
+<h1>Tutto il kit del subacqueo in un'app sola</h1>
+<p class="sub">Logbook, brevetti, calcolatori, fauna, segnali, nodi e altro ancora. Gratis, senza pubblicità e senza account. E funziona anche dove non prende.</p>
+<div class="chips"><span>Gratis</span><span>Niente pubblicità</span><span>Niente account</span><span>Funziona offline</span><span>6 lingue</span><span>Anche su tablet</span></div>
+<div class="store"><a href="https://play.google.com/store/apps/details?id=com.sgambaroapps.nautilus" class="badge" data-store="android" data-presto="In arrivo su Google Play"><img src="assets/badge/google-play-it.png" alt="Google Play" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">Google Play</span></a><a href="https://apps.apple.com/app/id6811002242" class="badge" data-store="ios" data-presto="In arrivo su App Store"><img src="assets/badge/app-store-it.svg" alt="App Store" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">App Store</span></a></div>
+<p class="nota">Gratis su Android e iPhone. Nessun acquisto in-app.</p>
+</div>
+<h2>Cosa c'è dentro</h2>
+<p class="occhiello">Dieci sezioni, tutte già pronte: niente da scaricare a parte, niente da configurare.</p>
+<div class="griglia">
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2z"/><path d="M17 3h2a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-2"/><path d="M8 8h6M8 12h6"/></svg></div><h3>Logbook</h3><p>Ogni immersione con profondità, durata, attrezzatura, compagno e foto. Le statistiche si calcolano da sole e il logbook esce in PDF.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2M15 10h4M15 14h3"/></svg></div><h3>Brevetti e certificati</h3><p>Brevetti, certificato medico, assicurazione, collaudo bombole. L'app ti avvisa prima che un documento scada.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M9 12h0M12 12h0M15 12h0M9 16h0M12 16h0M15 16h0" stroke-linecap="round" stroke-width="2.4"/></svg></div><h3>Calcolatori</h3><p>Consumo d'aria e autonomia, nitrox (MOD e pO₂), profondità equivalente, travaso tra bombole, conversione delle unità.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/><path d="m8.5 12.5 1.8 1.8 3.7-3.7"/></svg></div><h3>Checklist</h3><p>Le tue liste su misura — barca, viaggio, notturna — costruite scegliendo da un catalogo illustrato.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c3-4 7-6 11-6 3 0 5 1.6 6.4 3.3.4.5.4 1 0 1.5C19 12.5 17 14 14 14 9.8 14 6 15.8 3 12z"/><path d="m21 8.5-2.5 3.5 2.5 3.5"/><circle cx="8.5" cy="10.5" r=".6" fill="currentColor" stroke="none"/></svg></div><h3>Fauna marina</h3><p>307 schede con foto, nome scientifico, dove vive davvero l'animale e come comportarsi. 23 aree del mondo su mappa toccabile.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 10.5V4.8a1.5 1.5 0 0 1 3 0V11"/><path d="M15 11V6.8a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.6a5 5 0 0 1-3.8-1.8L5 14.6a1.6 1.6 0 0 1 2.4-2.1L9 14"/></svg></div><h3>Segnali subacquei</h3><p>66 gesti fotografati uno per uno e divisi per categoria: comunicazione, emergenza, direzione, animali.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="4.2"/><circle cx="15" cy="15" r="4.2"/><path d="M6 18 18 6"/></svg></div><h3>Nodi marinari</h3><p>Nove nodi che servono davvero in barca, spiegati passo per passo con le immagini.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div><h3>I miei Diving</h3><p>Centri e punti d'immersione da ricordare: contatti, servizi, coordinate GPS. Da lì navighi, chiami o scrivi con un tocco.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.4 6-5.4s6 2.1 6 5.4"/><path d="M16 5.2A3.2 3.2 0 0 1 16 11m1.6 3.9c2 .7 3.4 2.5 3.4 5.1"/></svg></div><h3>Amici sub</h3><p>La rubrica dei compagni conosciuti in giro per il mondo: contatti, social, dove vi siete incontrati.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z"/></svg></div><h3>Risorse online</h3><p>Meteo marino, maree, siti di riferimento: un catalogo già pronto che puoi ampliare.</p></div>
+</div>
+<div class="perche"><h2>Perché è diversa</h2><ul><li>Gratis davvero: nessun abbonamento, nessuna funzione a pagamento</li><li>Nessuna pubblicità, da nessuna parte</li><li>Nessuna registrazione: apri e usi</li><li>Funziona senza internet, sempre</li><li>I tuoi dati restano sul telefono: non li raccogliamo, non li vediamo, non li vendiamo</li><li>Backup completo in un solo file, per cambiare telefono senza perdere niente</li></ul></div>
+<h2>Come si presenta</h2>
+<div class="striscia">
+<img src="assets/shots/it-1.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/it-2.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/it-4.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/it-5.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/it-8.jpg" width="460" height="817" loading="lazy" alt="">
+</div>
+<div class="chiusura"><h2>Scarica l'app</h2><div class="store"><a href="https://play.google.com/store/apps/details?id=com.sgambaroapps.nautilus" class="badge" data-store="android" data-presto="In arrivo su Google Play"><img src="assets/badge/google-play-it.png" alt="Google Play" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">Google Play</span></a><a href="https://apps.apple.com/app/id6811002242" class="badge" data-store="ios" data-presto="In arrivo su App Store"><img src="assets/badge/app-store-it.svg" alt="App Store" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">App Store</span></a></div><p class="nota">Gratis su Android e iPhone. Nessun acquisto in-app.</p></div>
+<footer><div class="link"><a href="https://sgambaroapps.github.io/nautilus-privacy/">Informativa sulla privacy</a><a href="https://sgambaroapps.github.io/nautilus-privacy/support.html">Assistenza</a><a href="mailto:sgambaro.apps@gmail.com">Scrivimi</a></div><p>Progetto indipendente realizzato in Italia. Nessun dato dell'utente lascia il telefono.</p><p class="disc">Nautilus DiveKit è uno strumento informativo e organizzativo. Non sostituisce un corso, un brevetto, le tabelle o il computer subacqueo, e non va usato per pianificare la decompressione.</p></footer>
+</div></section>
+<section class="pagina" id="en" lang="en" data-titolo="Nautilus DiveKit — the whole diver's kit in one app">
+<div class="wrap">
+<div class="hero">
+<h1>The whole diver's kit in a single app</h1>
+<p class="sub">Dive log, certifications, calculators, marine life, hand signals, knots and more. Free, no ads, no account. And it works where there is no signal.</p>
+<div class="chips"><span>Free</span><span>No ads</span><span>No account</span><span>Works offline</span><span>6 languages</span><span>Tablets too</span></div>
+<div class="store"><a href="https://play.google.com/store/apps/details?id=com.sgambaroapps.nautilus" class="badge" data-store="android" data-presto="Coming soon to Google Play"><img src="assets/badge/google-play-en.png" alt="Google Play" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">Google Play</span></a><a href="https://apps.apple.com/app/id6811002242" class="badge" data-store="ios" data-presto="Coming soon to the App Store"><img src="assets/badge/app-store-en.svg" alt="App Store" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">App Store</span></a></div>
+<p class="nota">Free on Android and iPhone. No in-app purchases.</p>
+</div>
+<h2>What is inside</h2>
+<p class="occhiello">Ten sections, all ready to use: nothing else to download, nothing to set up.</p>
+<div class="griglia">
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2z"/><path d="M17 3h2a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-2"/><path d="M8 8h6M8 12h6"/></svg></div><h3>Dive logbook</h3><p>Every dive with depth, bottom time, gear, buddy and photos. Statistics build themselves and the logbook exports to PDF.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2M15 10h4M15 14h3"/></svg></div><h3>Certifications</h3><p>Certification cards, medical certificate, insurance, tank inspection. The app warns you before a document expires.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M9 12h0M12 12h0M15 12h0M9 16h0M12 16h0M15 16h0" stroke-linecap="round" stroke-width="2.4"/></svg></div><h3>Calculators</h3><p>Air consumption and gas planning, nitrox (MOD and pO₂), equivalent air depth, transfer between cylinders, unit conversion.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/><path d="m8.5 12.5 1.8 1.8 3.7-3.7"/></svg></div><h3>Checklists</h3><p>Your own lists — boat dive, trip, night dive — built from an illustrated catalogue.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c3-4 7-6 11-6 3 0 5 1.6 6.4 3.3.4.5.4 1 0 1.5C19 12.5 17 14 14 14 9.8 14 6 15.8 3 12z"/><path d="m21 8.5-2.5 3.5 2.5 3.5"/><circle cx="8.5" cy="10.5" r=".6" fill="currentColor" stroke="none"/></svg></div><h3>Marine life</h3><p>307 cards with photo, scientific name, where the animal really lives and how to behave. 23 regions of the world on a tappable map.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 10.5V4.8a1.5 1.5 0 0 1 3 0V11"/><path d="M15 11V6.8a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.6a5 5 0 0 1-3.8-1.8L5 14.6a1.6 1.6 0 0 1 2.4-2.1L9 14"/></svg></div><h3>Hand signals</h3><p>66 signs, each one photographed and sorted by category: communication, emergency, direction, animals.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="4.2"/><circle cx="15" cy="15" r="4.2"/><path d="M6 18 18 6"/></svg></div><h3>Sailor's knots</h3><p>Nine knots that are genuinely useful on a boat, explained step by step with images.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div><h3>My dive centres</h3><p>Dive shops and dive sites worth remembering: contacts, services, GPS. From there you navigate, call or write with one tap.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.4 6-5.4s6 2.1 6 5.4"/><path d="M16 5.2A3.2 3.2 0 0 1 16 11m1.6 3.9c2 .7 3.4 2.5 3.4 5.1"/></svg></div><h3>Dive buddies</h3><p>The address book of the people you meet around the world: contacts, socials, where you met.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z"/></svg></div><h3>Online resources</h3><p>Marine weather, tides, reference sites: a ready-made catalogue you can extend.</p></div>
+</div>
+<div class="perche"><h2>Why it is different</h2><ul><li>Genuinely free: no subscription, no paid features</li><li>No advertising, anywhere</li><li>No sign-up: open it and use it</li><li>Works without internet, always</li><li>Your data stays on your phone: we do not collect it, see it or sell it</li><li>Full backup in a single file, so you can change phone without losing anything</li></ul></div>
+<h2>A look inside</h2>
+<div class="striscia">
+<img src="assets/shots/en-1.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/en-2.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/en-4.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/en-5.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/en-8.jpg" width="460" height="817" loading="lazy" alt="">
+</div>
+<div class="chiusura"><h2>Get the app</h2><div class="store"><a href="https://play.google.com/store/apps/details?id=com.sgambaroapps.nautilus" class="badge" data-store="android" data-presto="Coming soon to Google Play"><img src="assets/badge/google-play-en.png" alt="Google Play" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">Google Play</span></a><a href="https://apps.apple.com/app/id6811002242" class="badge" data-store="ios" data-presto="Coming soon to the App Store"><img src="assets/badge/app-store-en.svg" alt="App Store" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">App Store</span></a></div><p class="nota">Free on Android and iPhone. No in-app purchases.</p></div>
+<footer><div class="link"><a href="https://sgambaroapps.github.io/nautilus-privacy/">Privacy policy</a><a href="https://sgambaroapps.github.io/nautilus-privacy/support.html">Support</a><a href="mailto:sgambaro.apps@gmail.com">Write to me</a></div><p>An independent project made in Italy. No user data ever leaves the phone.</p><p class="disc">Nautilus DiveKit is an informational and organisational tool. It does not replace training, certification, dive tables or a dive computer, and must not be used to plan decompression.</p></footer>
+</div></section>
+<section class="pagina" id="es" lang="es" data-titolo="Nautilus DiveKit — todo el kit del buceador en una sola app">
+<div class="wrap">
+<div class="hero">
+<h1>Todo el kit del buceador en una sola app</h1>
+<p class="sub">Cuaderno, titulaciones, calculadoras, fauna, señales, nudos y mucho más. Gratis, sin publicidad y sin cuenta. Y funciona donde no hay cobertura.</p>
+<div class="chips"><span>Gratis</span><span>Sin publicidad</span><span>Sin cuenta</span><span>Sin conexión</span><span>6 idiomas</span><span>También en tablet</span></div>
+<div class="store"><a href="https://play.google.com/store/apps/details?id=com.sgambaroapps.nautilus" class="badge" data-store="android" data-presto="Próximamente en Google Play"><img src="assets/badge/google-play-es.png" alt="Google Play" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">Google Play</span></a><a href="https://apps.apple.com/app/id6811002242" class="badge" data-store="ios" data-presto="Próximamente en la App Store"><img src="assets/badge/app-store-es.svg" alt="App Store" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">App Store</span></a></div>
+<p class="nota">Gratis en Android y iPhone. Sin compras dentro de la app.</p>
+</div>
+<h2>Qué hay dentro</h2>
+<p class="occhiello">Diez secciones, todas listas: nada más que descargar, nada que configurar.</p>
+<div class="griglia">
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2z"/><path d="M17 3h2a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-2"/><path d="M8 8h6M8 12h6"/></svg></div><h3>Cuaderno de buceo</h3><p>Cada inmersión con profundidad, duración, equipo, compañero y fotos. Las estadísticas se calculan solas y la bitácora sale en PDF.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2M15 10h4M15 14h3"/></svg></div><h3>Titulaciones</h3><p>Títulos, certificado médico, seguro, revisión de botellas. La app te avisa antes de que caduque un documento.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M9 12h0M12 12h0M15 12h0M9 16h0M12 16h0M15 16h0" stroke-linecap="round" stroke-width="2.4"/></svg></div><h3>Calculadoras</h3><p>Consumo de aire y autonomía, nitrox (MOD y pO₂), profundidad equivalente al aire, trasvase entre botellas, conversión de unidades.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/><path d="m8.5 12.5 1.8 1.8 3.7-3.7"/></svg></div><h3>Listas de equipo</h3><p>Tus propias listas — barco, viaje, nocturna — creadas a partir de un catálogo ilustrado.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c3-4 7-6 11-6 3 0 5 1.6 6.4 3.3.4.5.4 1 0 1.5C19 12.5 17 14 14 14 9.8 14 6 15.8 3 12z"/><path d="m21 8.5-2.5 3.5 2.5 3.5"/><circle cx="8.5" cy="10.5" r=".6" fill="currentColor" stroke="none"/></svg></div><h3>Fauna marina</h3><p>307 fichas con foto, nombre científico, dónde vive de verdad el animal y cómo comportarte. 23 áreas del mundo en un mapa táctil.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 10.5V4.8a1.5 1.5 0 0 1 3 0V11"/><path d="M15 11V6.8a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.6a5 5 0 0 1-3.8-1.8L5 14.6a1.6 1.6 0 0 1 2.4-2.1L9 14"/></svg></div><h3>Señales de buceo</h3><p>66 gestos fotografiados uno a uno y ordenados por categoría: comunicación, emergencia, dirección, animales.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="4.2"/><circle cx="15" cy="15" r="4.2"/><path d="M6 18 18 6"/></svg></div><h3>Nudos marineros</h3><p>Nueve nudos realmente útiles a bordo, explicados paso a paso con imágenes.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div><h3>Mis centros de buceo</h3><p>Centros y puntos de inmersión que quieres recordar: contactos, servicios, GPS. Desde ahí navegas, llamas o escribes con un toque.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.4 6-5.4s6 2.1 6 5.4"/><path d="M16 5.2A3.2 3.2 0 0 1 16 11m1.6 3.9c2 .7 3.4 2.5 3.4 5.1"/></svg></div><h3>Compañeros de buceo</h3><p>La agenda de la gente que conoces por el mundo: contactos, redes sociales, dónde os conocisteis.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z"/></svg></div><h3>Recursos en línea</h3><p>Meteorología marina, mareas, webs de referencia: un catálogo ya preparado que puedes ampliar.</p></div>
+</div>
+<div class="perche"><h2>Por qué es diferente</h2><ul><li>Gratis de verdad: sin suscripción y sin funciones de pago</li><li>Sin publicidad, en ninguna parte</li><li>Sin registro: la abres y la usas</li><li>Funciona sin internet, siempre</li><li>Tus datos se quedan en tu teléfono: no los recogemos, no los vemos, no los vendemos</li><li>Copia de seguridad completa en un solo archivo, para cambiar de móvil sin perder nada</li></ul></div>
+<h2>Así se ve</h2>
+<div class="striscia">
+<img src="assets/shots/es-1.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/es-2.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/es-4.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/es-5.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/es-8.jpg" width="460" height="817" loading="lazy" alt="">
+</div>
+<div class="chiusura"><h2>Descárgala</h2><div class="store"><a href="https://play.google.com/store/apps/details?id=com.sgambaroapps.nautilus" class="badge" data-store="android" data-presto="Próximamente en Google Play"><img src="assets/badge/google-play-es.png" alt="Google Play" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">Google Play</span></a><a href="https://apps.apple.com/app/id6811002242" class="badge" data-store="ios" data-presto="Próximamente en la App Store"><img src="assets/badge/app-store-es.svg" alt="App Store" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">App Store</span></a></div><p class="nota">Gratis en Android y iPhone. Sin compras dentro de la app.</p></div>
+<footer><div class="link"><a href="https://sgambaroapps.github.io/nautilus-privacy/">Política de privacidad</a><a href="https://sgambaroapps.github.io/nautilus-privacy/support.html">Soporte</a><a href="mailto:sgambaro.apps@gmail.com">Escríbeme</a></div><p>Proyecto independiente hecho en Italia. Ningún dato del usuario sale del teléfono.</p><p class="disc">Nautilus DiveKit es una herramienta informativa y organizativa. No sustituye a un curso, una titulación, las tablas ni el ordenador de buceo, y no debe usarse para planificar la descompresión.</p></footer>
+</div></section>
+<section class="pagina" id="fr" lang="fr" data-titolo="Nautilus DiveKit — tout le kit du plongeur dans une seule application">
+<div class="wrap">
+<div class="hero">
+<h1>Tout le kit du plongeur dans une seule application</h1>
+<p class="sub">Carnet, brevets, calculateurs, faune, signes, nœuds et bien plus. Gratuite, sans publicité ni compte. Et elle fonctionne là où il n'y a pas de réseau.</p>
+<div class="chips"><span>Gratuite</span><span>Sans publicité</span><span>Sans compte</span><span>Hors ligne</span><span>6 langues</span><span>Aussi sur tablette</span></div>
+<div class="store"><a href="https://play.google.com/store/apps/details?id=com.sgambaroapps.nautilus" class="badge" data-store="android" data-presto="Bientôt sur Google Play"><img src="assets/badge/google-play-fr.png" alt="Google Play" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">Google Play</span></a><a href="https://apps.apple.com/app/id6811002242" class="badge" data-store="ios" data-presto="Bientôt sur l'App Store"><img src="assets/badge/app-store-fr.svg" alt="App Store" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">App Store</span></a></div>
+<p class="nota">Gratuite sur Android et iPhone. Aucun achat intégré.</p>
+</div>
+<h2>Ce qu'il y a dedans</h2>
+<p class="occhiello">Dix rubriques, toutes prêtes : rien d'autre à télécharger, rien à configurer.</p>
+<div class="griglia">
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2z"/><path d="M17 3h2a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-2"/><path d="M8 8h6M8 12h6"/></svg></div><h3>Carnet de plongée</h3><p>Chaque plongée avec profondeur, durée, matériel, binôme et photos. Les statistiques se calculent seules et le carnet s'exporte en PDF.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2M15 10h4M15 14h3"/></svg></div><h3>Brevets et certificats</h3><p>Brevets, certificat médical, assurance, requalification des blocs. L'application te prévient avant l'expiration.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M9 12h0M12 12h0M15 12h0M9 16h0M12 16h0M15 16h0" stroke-linecap="round" stroke-width="2.4"/></svg></div><h3>Calculateurs</h3><p>Consommation d'air et autonomie, nitrox (PMU et pO₂), profondeur équivalente à l'air, transvasement entre blocs, conversion d'unités.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/><path d="m8.5 12.5 1.8 1.8 3.7-3.7"/></svg></div><h3>Listes de matériel</h3><p>Tes propres listes — bateau, voyage, plongée de nuit — composées à partir d'un catalogue illustré.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c3-4 7-6 11-6 3 0 5 1.6 6.4 3.3.4.5.4 1 0 1.5C19 12.5 17 14 14 14 9.8 14 6 15.8 3 12z"/><path d="m21 8.5-2.5 3.5 2.5 3.5"/><circle cx="8.5" cy="10.5" r=".6" fill="currentColor" stroke="none"/></svg></div><h3>Faune marine</h3><p>307 fiches avec photo, nom scientifique, aire de répartition réelle et conduite à tenir. 23 régions du monde sur une carte tactile.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 10.5V4.8a1.5 1.5 0 0 1 3 0V11"/><path d="M15 11V6.8a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.6a5 5 0 0 1-3.8-1.8L5 14.6a1.6 1.6 0 0 1 2.4-2.1L9 14"/></svg></div><h3>Signes de plongée</h3><p>66 gestes photographiés un par un et classés par catégorie : communication, urgence, direction, animaux.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="4.2"/><circle cx="15" cy="15" r="4.2"/><path d="M6 18 18 6"/></svg></div><h3>Nœuds marins</h3><p>Neuf nœuds vraiment utiles à bord, expliqués étape par étape avec des images.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div><h3>Mes centres de plongée</h3><p>Les centres et les sites à retenir : contacts, services, GPS. De là tu lances la navigation, tu appelles ou tu écris d'un geste.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.4 6-5.4s6 2.1 6 5.4"/><path d="M16 5.2A3.2 3.2 0 0 1 16 11m1.6 3.9c2 .7 3.4 2.5 3.4 5.1"/></svg></div><h3>Binômes et amis</h3><p>Le répertoire des personnes rencontrées aux quatre coins du monde : contacts, réseaux, lieu de rencontre.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z"/></svg></div><h3>Ressources en ligne</h3><p>Météo marine, marées, sites de référence : un catalogue déjà prêt, que tu peux compléter.</p></div>
+</div>
+<div class="perche"><h2>Pourquoi elle est différente</h2><ul><li>Vraiment gratuite : aucun abonnement, aucune fonction payante</li><li>Aucune publicité, nulle part</li><li>Aucune inscription : tu ouvres et tu t'en sers</li><li>Fonctionne sans internet, toujours</li><li>Tes données restent sur ton téléphone : nous ne les collectons pas, ne les voyons pas et ne les vendons pas</li><li>Sauvegarde complète dans un seul fichier, pour changer de téléphone sans rien perdre</li></ul></div>
+<h2>Un aperçu</h2>
+<div class="striscia">
+<img src="assets/shots/fr-1.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/fr-2.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/fr-4.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/fr-5.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/fr-8.jpg" width="460" height="817" loading="lazy" alt="">
+</div>
+<div class="chiusura"><h2>Télécharger</h2><div class="store"><a href="https://play.google.com/store/apps/details?id=com.sgambaroapps.nautilus" class="badge" data-store="android" data-presto="Bientôt sur Google Play"><img src="assets/badge/google-play-fr.png" alt="Google Play" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">Google Play</span></a><a href="https://apps.apple.com/app/id6811002242" class="badge" data-store="ios" data-presto="Bientôt sur l'App Store"><img src="assets/badge/app-store-fr.svg" alt="App Store" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">App Store</span></a></div><p class="nota">Gratuite sur Android et iPhone. Aucun achat intégré.</p></div>
+<footer><div class="link"><a href="https://sgambaroapps.github.io/nautilus-privacy/">Politique de confidentialité</a><a href="https://sgambaroapps.github.io/nautilus-privacy/support.html">Assistance</a><a href="mailto:sgambaro.apps@gmail.com">M'écrire</a></div><p>Projet indépendant réalisé en Italie. Aucune donnée de l'utilisateur ne quitte le téléphone.</p><p class="disc">Nautilus DiveKit est un outil d'information et d'organisation. Il ne remplace ni une formation, ni un brevet, ni les tables, ni l'ordinateur de plongée, et ne doit pas servir à planifier une décompression.</p></footer>
+</div></section>
+<section class="pagina" id="de" lang="de" data-titolo="Nautilus DiveKit — das ganze Taucher-Kit in einer App">
+<div class="wrap">
+<div class="hero">
+<h1>Das ganze Taucher-Kit in einer einzigen App</h1>
+<p class="sub">Logbuch, Brevets, Rechner, Meerestiere, Tauchzeichen, Knoten und mehr. Kostenlos, ohne Werbung und ohne Konto. Und es funktioniert auch ohne Empfang.</p>
+<div class="chips"><span>Kostenlos</span><span>Ohne Werbung</span><span>Ohne Konto</span><span>Offline</span><span>6 Sprachen</span><span>Auch auf Tablets</span></div>
+<div class="store"><a href="https://play.google.com/store/apps/details?id=com.sgambaroapps.nautilus" class="badge" data-store="android" data-presto="Demnächst bei Google Play"><img src="assets/badge/google-play-de.png" alt="Google Play" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">Google Play</span></a><a href="https://apps.apple.com/app/id6811002242" class="badge" data-store="ios" data-presto="Demnächst im App Store"><img src="assets/badge/app-store-de.svg" alt="App Store" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">App Store</span></a></div>
+<p class="nota">Kostenlos für Android und iPhone. Keine In-App-Käufe.</p>
+</div>
+<h2>Was drin ist</h2>
+<p class="occhiello">Zehn Bereiche, alle sofort nutzbar: nichts nachzuladen, nichts einzurichten.</p>
+<div class="griglia">
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2z"/><path d="M17 3h2a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-2"/><path d="M8 8h6M8 12h6"/></svg></div><h3>Tauchlogbuch</h3><p>Jeder Tauchgang mit Tiefe, Dauer, Ausrüstung, Buddy und Fotos. Die Statistik entsteht automatisch, das Logbuch geht als PDF raus.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2M15 10h4M15 14h3"/></svg></div><h3>Brevets und Dokumente</h3><p>Brevets, ärztliches Attest, Versicherung, Flaschen-TÜV. Die App meldet sich, bevor ein Dokument abläuft.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M9 12h0M12 12h0M15 12h0M9 16h0M12 16h0M15 16h0" stroke-linecap="round" stroke-width="2.4"/></svg></div><h3>Tauchrechner</h3><p>Luftverbrauch und Reichweite, Nitrox (MOD und pO₂), äquivalente Lufttiefe, Umfüllen zwischen Flaschen, Einheitenumrechnung.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/><path d="m8.5 12.5 1.8 1.8 3.7-3.7"/></svg></div><h3>Checklisten</h3><p>Eigene Listen — Bootstauchgang, Tauchreise, Nachttauchgang — aus einem bebilderten Katalog zusammengestellt.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c3-4 7-6 11-6 3 0 5 1.6 6.4 3.3.4.5.4 1 0 1.5C19 12.5 17 14 14 14 9.8 14 6 15.8 3 12z"/><path d="m21 8.5-2.5 3.5 2.5 3.5"/><circle cx="8.5" cy="10.5" r=".6" fill="currentColor" stroke="none"/></svg></div><h3>Meerestiere</h3><p>307 Steckbriefe mit Foto, wissenschaftlichem Namen, tatsächlichem Verbreitungsgebiet und richtigem Verhalten. 23 Regionen auf einer Karte.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 10.5V4.8a1.5 1.5 0 0 1 3 0V11"/><path d="M15 11V6.8a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.6a5 5 0 0 1-3.8-1.8L5 14.6a1.6 1.6 0 0 1 2.4-2.1L9 14"/></svg></div><h3>Tauchzeichen</h3><p>66 Handzeichen, einzeln fotografiert und nach Kategorien sortiert: Verständigung, Notfall, Richtung, Tiere.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="4.2"/><circle cx="15" cy="15" r="4.2"/><path d="M6 18 18 6"/></svg></div><h3>Seemannsknoten</h3><p>Neun Knoten, die an Bord wirklich helfen, Schritt für Schritt mit Bildern erklärt.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div><h3>Meine Tauchbasen</h3><p>Basen und Tauchplätze zum Merken: Kontakte, Angebot, GPS. Von dort Navigation starten, anrufen oder mailen — mit einem Fingertipp.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.4 6-5.4s6 2.1 6 5.4"/><path d="M16 5.2A3.2 3.2 0 0 1 16 11m1.6 3.9c2 .7 3.4 2.5 3.4 5.1"/></svg></div><h3>Tauchpartner</h3><p>Das Adressbuch der Menschen, die du weltweit kennenlernst: Kontakte, soziale Netzwerke, Ort des Kennenlernens.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z"/></svg></div><h3>Online-Quellen</h3><p>Seewetter, Gezeiten, Nachschlagewerke: ein fertiger Katalog, den du erweitern kannst.</p></div>
+</div>
+<div class="perche"><h2>Warum sie anders ist</h2><ul><li>Wirklich kostenlos: kein Abo, keine kostenpflichtigen Funktionen</li><li>Keine Werbung, nirgends</li><li>Keine Anmeldung: öffnen und loslegen</li><li>Funktioniert immer, auch ohne Internet</li><li>Deine Daten bleiben auf dem Handy: wir sammeln sie nicht, sehen sie nicht und verkaufen sie nicht</li><li>Vollständige Sicherung in einer einzigen Datei — Handywechsel ohne Datenverlust</li></ul></div>
+<h2>So sieht sie aus</h2>
+<div class="striscia">
+<img src="assets/shots/de-1.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/de-2.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/de-4.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/de-5.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/de-8.jpg" width="460" height="817" loading="lazy" alt="">
+</div>
+<div class="chiusura"><h2>App laden</h2><div class="store"><a href="https://play.google.com/store/apps/details?id=com.sgambaroapps.nautilus" class="badge" data-store="android" data-presto="Demnächst bei Google Play"><img src="assets/badge/google-play-de.png" alt="Google Play" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">Google Play</span></a><a href="https://apps.apple.com/app/id6811002242" class="badge" data-store="ios" data-presto="Demnächst im App Store"><img src="assets/badge/app-store-de.svg" alt="App Store" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">App Store</span></a></div><p class="nota">Kostenlos für Android und iPhone. Keine In-App-Käufe.</p></div>
+<footer><div class="link"><a href="https://sgambaroapps.github.io/nautilus-privacy/">Datenschutzerklärung</a><a href="https://sgambaroapps.github.io/nautilus-privacy/support.html">Hilfe</a><a href="mailto:sgambaro.apps@gmail.com">Schreib mir</a></div><p>Unabhängiges Projekt aus Italien. Keine Nutzerdaten verlassen das Handy.</p><p class="disc">Nautilus DiveKit ist ein Informations- und Organisationswerkzeug. Es ersetzt weder Ausbildung noch Brevet, weder Tabellen noch Tauchcomputer und darf nicht zur Dekompressionsplanung verwendet werden.</p></footer>
+</div></section>
+<section class="pagina" id="pt" lang="pt" data-titolo="Nautilus DiveKit — todo o kit do mergulhador numa só aplicação">
+<div class="wrap">
+<div class="hero">
+<h1>Todo o kit do mergulhador numa só aplicação</h1>
+<p class="sub">Diário, brevês, calculadoras, fauna, sinais, nós e muito mais. Grátis, sem publicidade e sem conta. E funciona onde não há rede.</p>
+<div class="chips"><span>Grátis</span><span>Sem publicidade</span><span>Sem conta</span><span>Offline</span><span>6 línguas</span><span>Também em tablet</span></div>
+<div class="store"><a href="https://play.google.com/store/apps/details?id=com.sgambaroapps.nautilus" class="badge" data-store="android" data-presto="Em breve no Google Play"><img src="assets/badge/google-play-pt.png" alt="Google Play" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">Google Play</span></a><a href="https://apps.apple.com/app/id6811002242" class="badge" data-store="ios" data-presto="Em breve na App Store"><img src="assets/badge/app-store-pt.svg" alt="App Store" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">App Store</span></a></div>
+<p class="nota">Grátis para Android e iPhone. Sem compras na aplicação.</p>
+</div>
+<h2>O que está lá dentro</h2>
+<p class="occhiello">Dez secções, todas prontas: nada para descarregar à parte, nada para configurar.</p>
+<div class="griglia">
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2z"/><path d="M17 3h2a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-2"/><path d="M8 8h6M8 12h6"/></svg></div><h3>Diário de mergulho</h3><p>Cada mergulho com profundidade, duração, equipamento, companheiro e fotografias. As estatísticas fazem-se sozinhas e o diário sai em PDF.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2M15 10h4M15 14h3"/></svg></div><h3>Brevês e certificados</h3><p>Brevês, atestado médico, seguro, inspecção das garrafas. A aplicação avisa-te antes de um documento caducar.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M9 12h0M12 12h0M15 12h0M9 16h0M12 16h0M15 16h0" stroke-linecap="round" stroke-width="2.4"/></svg></div><h3>Calculadoras</h3><p>Consumo de ar e autonomia, nitrox (MOD e pO₂), profundidade equivalente ao ar, transfega entre garrafas, conversão de unidades.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/><path d="m8.5 12.5 1.8 1.8 3.7-3.7"/></svg></div><h3>Listas de equipamento</h3><p>As tuas listas — barco, viagem, mergulho nocturno — criadas a partir de um catálogo ilustrado.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c3-4 7-6 11-6 3 0 5 1.6 6.4 3.3.4.5.4 1 0 1.5C19 12.5 17 14 14 14 9.8 14 6 15.8 3 12z"/><path d="m21 8.5-2.5 3.5 2.5 3.5"/><circle cx="8.5" cy="10.5" r=".6" fill="currentColor" stroke="none"/></svg></div><h3>Fauna marinha</h3><p>307 fichas com fotografia, nome científico, onde vive realmente o animal e como te comportares. 23 áreas do mundo num mapa táctil.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 10.5V4.8a1.5 1.5 0 0 1 3 0V11"/><path d="M15 11V6.8a1.5 1.5 0 0 1 3 0V14a6 6 0 0 1-6 6h-.6a5 5 0 0 1-3.8-1.8L5 14.6a1.6 1.6 0 0 1 2.4-2.1L9 14"/></svg></div><h3>Sinais de mergulho</h3><p>66 gestos fotografados um a um e organizados por categoria: comunicação, emergência, direcção, animais.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="4.2"/><circle cx="15" cy="15" r="4.2"/><path d="M6 18 18 6"/></svg></div><h3>Nós marinheiros</h3><p>Nove nós mesmo úteis a bordo, explicados passo a passo com imagens.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg></div><h3>Os meus centros</h3><p>Centros e pontos de mergulho para guardar: contactos, serviços, GPS. Daí arrancas a navegação, ligas ou escreves com um toque.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.4 6-5.4s6 2.1 6 5.4"/><path d="M16 5.2A3.2 3.2 0 0 1 16 11m1.6 3.9c2 .7 3.4 2.5 3.4 5.1"/></svg></div><h3>Companheiros</h3><p>A agenda das pessoas que conheces pelo mundo: contactos, redes sociais, onde se conheceram.</p></div>
+<div class="card"><div class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z"/></svg></div><h3>Recursos online</h3><p>Meteorologia marítima, marés, sites de referência: um catálogo já preparado, que podes alargar.</p></div>
+</div>
+<div class="perche"><h2>Porque é diferente</h2><ul><li>Mesmo gratuita: sem subscrição e sem funções pagas</li><li>Sem publicidade, em lado nenhum</li><li>Sem registo: abres e usas</li><li>Funciona sem internet, sempre</li><li>Os teus dados ficam no telemóvel: não os recolhemos, não os vemos e não os vendemos</li><li>Cópia de segurança completa num único ficheiro, para mudar de telemóvel sem perder nada</li></ul></div>
+<h2>Um olhar por dentro</h2>
+<div class="striscia">
+<img src="assets/shots/pt-1.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/pt-2.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/pt-4.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/pt-5.jpg" width="460" height="817" loading="lazy" alt="">
+<img src="assets/shots/pt-8.jpg" width="460" height="817" loading="lazy" alt="">
+</div>
+<div class="chiusura"><h2>Descarregar</h2><div class="store"><a href="https://play.google.com/store/apps/details?id=com.sgambaroapps.nautilus" class="badge" data-store="android" data-presto="Em breve no Google Play"><img src="assets/badge/google-play-pt.png" alt="Google Play" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">Google Play</span></a><a href="https://apps.apple.com/app/id6811002242" class="badge" data-store="ios" data-presto="Em breve na App Store"><img src="assets/badge/app-store-pt.svg" alt="App Store" onerror="this.parentElement.classList.add('senzabadge')"><span class="ripiego">App Store</span></a></div><p class="nota">Grátis para Android e iPhone. Sem compras na aplicação.</p></div>
+<footer><div class="link"><a href="https://sgambaroapps.github.io/nautilus-privacy/">Política de privacidade</a><a href="https://sgambaroapps.github.io/nautilus-privacy/support.html">Apoio</a><a href="mailto:sgambaro.apps@gmail.com">Escreve-me</a></div><p>Projecto independente feito em Itália. Nenhum dado do utilizador sai do telemóvel.</p><p class="disc">O Nautilus DiveKit é uma ferramenta informativa e de organização. Não substitui a formação, o brevê, as tabelas nem o computador de mergulho, e não deve ser usado para planear descompressão.</p></footer>
+</div></section>
+</main>
+<script>
+// ===========================================================================
+//  DUE INTERRUTTORI DA CAMBIARE A MANO
+//  Metti true quando quello store e' davvero pubblico: da quel momento al
+//  posto della scritta "in arrivo" compare il pulsante che porta alla scheda.
+//  Si modificano anche con il Blocco note, senza rigenerare la pagina.
+// ===========================================================================
+var STORE_VIVI = { android: false, ios: false };
+
+// Le sei lingue sono tutte dentro la pagina: qui si nasconde solo quella che
+// non serve. Senza JavaScript restano visibili tutte, una sotto l'altra.
+(function () {
+  var LINGUE = ["it", "en", "es", "fr", "de", "pt"];
+  document.body.classList.add("js");
+
+  // Store non ancora pubblico: il collegamento diventa una targhetta spenta.
+  document.querySelectorAll("a[data-store]").forEach(function (a) {
+    if (STORE_VIVI[a.dataset.store]) { return; }
+    var presto = document.createElement("span");
+    presto.className = "presto";
+    presto.textContent = a.dataset.presto;
+    a.replaceWith(presto);
+  });
+
+  function mostra(codice) {
+    if (LINGUE.indexOf(codice) === -1) { codice = "en"; }
+    LINGUE.forEach(function (c) {
+      document.getElementById(c).hidden = (c !== codice);
+    });
+    document.querySelectorAll("#lingue a").forEach(function (a) {
+      a.classList.toggle("attiva", a.dataset.lang === codice);
+    });
+    document.querySelectorAll("[data-claim]").forEach(function (s) {
+      s.hidden = (s.dataset.claim !== codice);
+    });
+    document.documentElement.lang = codice;
+    var t = document.querySelector('#' + codice + ' [data-titolo]');
+    if (t) { document.title = t.dataset.titolo; }
+  }
+
+  document.querySelectorAll("#lingue a").forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      mostra(a.dataset.lang);
+      try { history.replaceState(null, "", "#" + a.dataset.lang); } catch (err) {}
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  var daUrl = location.hash.replace("#", "");
+  var daBrowser = (navigator.language || "en").slice(0, 2).toLowerCase();
+  mostra(LINGUE.indexOf(daUrl) !== -1 ? daUrl : daBrowser);
+
+  // Chi arriva da un indirizzo che finisce con #it (o #fr, ...) sceglie la
+  // lingua, non un punto della pagina: il browser pero' salterebbe alla
+  // sezione, scavalcando l'intestazione. Si torna in cima.
+  if (LINGUE.indexOf(daUrl) !== -1) {
+    var inCima = function () { window.scrollTo({ top: 0, behavior: "auto" }); };
+    inCima();
+    setTimeout(inCima, 0);
+    window.addEventListener("load", inCima);
+  }
+})();
+</script>
+</body></html>
